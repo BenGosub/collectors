@@ -17,7 +17,7 @@ class Record(base.Record):
     table = 'hra'
     primary_key = 'application_id'
     updated_key = 'updated_date'
-    ensure_fields = False
+    ensure_fields = True
 
     # General
 
