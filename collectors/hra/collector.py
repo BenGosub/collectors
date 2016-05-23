@@ -4,12 +4,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import io
-import ijson
-import shutil
 import logging
-import zipfile
-import tempfile
 import requests
 import sqlalchemy
 import os
@@ -26,6 +21,8 @@ hra_user = os.environ.get('HRA_USERNAME')
 hra_pass = os.environ.get('HRA_PASSWORD')
 
 s = requests.Session()
+
+
 def make_request(url, from_, to, filter=None):
     # Updates filter is optional-categorical value
     # 1 - returns all studies for the given period
@@ -40,6 +37,7 @@ def make_request(url, from_, to, filter=None):
     return (response, result_str)
 
 # Module API
+
 
 def collect(conf, conn):
     errors = 0
@@ -93,10 +91,14 @@ def collect(conf, conn):
                 data['supporting_info_suitability'] = application['SupportingInfoSuitability']
                 data['other_comments'] = application['OtherComments']
                 data['research_summary_suitability'] = application['ResearchSummarySuitability']
-                
-                record = Record.create(endpoint, data)
-                base.writers.write_record(conn, record)
-                
+
+                # Insert into database only if app_id not inserted already
+                check_id = conn['warehouse'].query("select count(*) from hra where application_id='%s'" % str(application['ApplicationID']))
+                for row in check_id:
+                    if row[0]['count'] == 0:
+                        record = Record.create(endpoint, data)
+                        base.writers.write_record(conn, record)
+
                 success +=1
                 print("Successful parsing iteration")
             except Exception as exception:

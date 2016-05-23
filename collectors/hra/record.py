@@ -5,7 +5,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from .. import base
-from ..base.fields import Text, Date, Integer, Datetime
+from ..base.fields import Text, Date, Datetime
 
 
 # Module API
@@ -50,7 +50,7 @@ class Record(base.Record):
     decision = Text()
     decision_date = Datetime('%Y-%m-%d %H:%M:%S')
     human_tissue_license = Text()
-    #empty unicode
+    # empty unicode
     rtb_title = Text()
     research_database_title = Text()
     application_full_title = Text()
