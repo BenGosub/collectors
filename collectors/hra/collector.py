@@ -99,7 +99,7 @@ def collect(conf, conn):
                         record = Record.create(endpoint, data)
                         base.writers.write_record(conn, record)
 
-                success +=1
+                success += 1
                 print("Successful parsing iteration")
             except Exception as exception:
 
@@ -130,11 +130,8 @@ def collect(conf, conn):
     if (len(response.json()) > 0):
         while True:
             to_date = get_to_date()
-            print(to_date)
             from_date = to_date - timedelta(days=query_period)
             print('Sleeping for 30sec.')
             time.sleep(30)
             response, endpoint = make_request(from_=from_date, to=to_date, url=url, filter=None)
             parse_response(response, endpoint, from_date, to_date, errors, success)
-            
-        
