@@ -16,13 +16,15 @@ class Record(base.Record):
 
     table = 'hra'
     primary_key = 'application_id'
-    updated_key = 'updated_date'
+    updated_key = 'last_updated'
     ensure_fields = True
 
     # General
 
-    # this is when the 
-    application_id = Integer()
+    last_updated = Date('%Y-%m-%d')
+    api_date_from = Date('%Y-%m-%d')
+    api_date_to = Date('%Y-%m-%d')
+    application_id = Text()
     publication_date = Date('%Y-%m-%dT%H:%M:%S')
     # this is when the record has been updated
     updated_date = Date('%Y-%m-%dT%H:%M:%S.%f')
