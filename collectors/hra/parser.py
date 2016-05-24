@@ -8,17 +8,16 @@ from .record import Record
 from datetime import date
 import logging
 import six
-from .collector import conn, from_date
 logger = logging.getLogger(__name__)
 
 
-def parse_response(response, endpoint, from_api, to_date, errors, success, conn=conn):
+def parse_response(response, endpoint, from_date, to_date, errors, success, conn):
     for application in response.json():
         try:
             data = {}
-            data['last_updated'] = date.today().strftime('%Y/%m/%d')
-            data['api_date_from'] = from_date.strftime('%Y/%m/%d')
-            data['api_date_to'] = to_date.strftime('%Y/%m/%d')
+            data['last_updated'] = date.today().strftime('%Y-%m-%d')
+            data['api_date_from'] = from_date.strftime('%Y-%m-%d')
+            data['api_date_to'] = to_date.strftime('%Y-%m-%d')
             app_id = six.u(str(application['ApplicationID']))
             data['application_id'] = app_id
             data['publication_date'] = application['PublicationDate']
@@ -62,11 +61,8 @@ def parse_response(response, endpoint, from_api, to_date, errors, success, conn=
             data['other_comments'] = application['OtherComments']
             data['research_summary_suitability'] = application['ResearchSummarySuitability']
 
-            # Insert into database only if app_id not inserted already
-            check_id = conn['warehouse'].query('select count(*) from hra where application_id=?', app_id)
-            for row in check_id:
-                if row[0]['count'] == 0:
-                    record = Record.create(endpoint, data)
+            record = Record.create(endpoint, data)
+            return (record, app_id)
 
             success += 1
             if not success % 100:
@@ -77,4 +73,3 @@ def parse_response(response, endpoint, from_api, to_date, errors, success, conn=
             # Log warning
             errors += 1
             logger.warning('Collecting error: %s', repr(exception))
-        return record
