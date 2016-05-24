@@ -74,8 +74,8 @@ def _make_request(url, from_, to, filter=None):
 
 
 def _get_to_date(conn):
-        to_date = conn['warehouse'].query('select min(api_date_from) from hra').result_proxy.first()[0] - timedelta(days=1)
-        return to_date
+    to_date = conn['warehouse'].query('select min(api_date_from) from hra').result_proxy.first()[0] - timedelta(days=1)
+    return to_date
 
 
 def _write_base(record, app_id, conn):
