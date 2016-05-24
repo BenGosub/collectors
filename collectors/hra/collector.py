@@ -16,9 +16,6 @@ from .parser import parse_response
 import logging
 logger = logging.getLogger(__name__)
 
-
-parse_datetime = base.helpers.parse_datetime
-
 url = os.environ.get('HRA_URL')
 hra_user = os.environ.get('HRA_USERNAME')
 hra_pass = os.environ.get('HRA_PASSWORD')
