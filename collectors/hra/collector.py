@@ -68,7 +68,7 @@ def _make_request(url, from_, to, filter=None):
     if filter is None:
         pass
     else:
-        result_str = result_str + '&updatesFilter={}'.format(six.u(str(filter)))
+        result_str = '{0}&updatesFilter={1}'.format(result_str, six.u(str(filter)))
     response = s.get(result_str, auth=(hra_user, hra_pass))
     return (response, result_str)
 
