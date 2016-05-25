@@ -22,11 +22,8 @@ class Record(base.Record):
     # General
 
     last_updated = Date('%Y-%m-%d')
-    api_date_from = Date('%Y-%m-%d')
-    api_date_to = Date('%Y-%m-%d')
     application_id = Text()
     publication_date = Date('%Y-%m-%dT%H:%M:%S')
-    # this is when the record has been updated
     updated_date = Date('%Y-%m-%dT%H:%M:%S.%f')
     comittee_name = Text()
     comittee_ref_number = Text()
@@ -37,11 +34,8 @@ class Record(base.Record):
     study_type_id = Text()
     study_type = Text()
     sponsor_org = Text()
-    # null in the API
     research_programme = Text()
-    # null in the API
     data_coll_arrangements = Text()
-    # null in the API
     establishment_org = Text()
     establishment_org_address_1 = Text()
     establishment_org_address_2 = Text()
@@ -50,13 +44,11 @@ class Record(base.Record):
     decision = Text()
     decision_date = Datetime('%Y-%m-%d %H:%M:%S')
     human_tissue_license = Text()
-    # empty unicode
     rtb_title = Text()
     research_database_title = Text()
     application_full_title = Text()
     isrctn = Text()
     nct = Text()
-    # null in the API
     additional_ref_numbers = Text()
     duration_of_study_in_uk = Text()
     research_summary = Text()

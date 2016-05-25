@@ -31,27 +31,35 @@ def collect(conf, conn):
     try:
         table = conn['warehouse'].load_table('hra')
         if table.count() == 0:
-            to_date = date.today()
+            from_date = date(2008, 12, 1)
         else:
-            to_date = _get_to_date(conn)
+            from_date = _get_from_date(conn)
 
     except sqlalchemy.exc.NoSuchTableError:
-        to_date = date.today()
+        # Start from the begining where first record is found
+        from_date = date(2008, 12, 01)
 
-    query_period = 6
-    from_date = to_date - timedelta(days=query_period)
-    response, endpoint = _make_request(from_=from_date, to=to_date, url=url, filter=None)
-    record, app_id = parse_response(response, endpoint, from_date, to_date, errors, success, conn)
-    _write_base(record, app_id, conn)
-    if (len(response.json()) > 0):
-        while True:
-            to_date = _get_to_date(conn)
-            from_date = to_date - timedelta(days=query_period)
-            logger.info('Sleeping for 30sec.')
-            time.sleep(30)
-            response, endpoint = _make_request(from_=from_date, to=to_date, url=url, filter=None)
-            record, app_id = parse_response(response, endpoint, from_date, to_date, errors, success, conn)
-            _write_base(record, app_id, conn)
+    query_period = 24
+    to_date = from_date + timedelta(days=query_period)
+    while to_date < date.today():
+        response = _make_request(from_=from_date, to=to_date, url=url, filter=None)
+        if (len(response.json()) > 0):
+            for application in response.json():
+                try:
+                    record = parse_response(application, response, from_date, to_date)
+                    base.writers.write_record(conn, record)
+                    success += 1
+                    if not success % 100:
+                        logger.info('Collected %s "%s" applications',
+                            success, record.table)
+                except Exception as exception:
+                    # Log warning
+                    errors += 1
+                    logger.warning('Collecting error: %s', repr(exception))
+        from_date = to_date + timedelta(days=1)
+        to_date = to_date + timedelta(days=query_period)
+        logger.info('Sleeping for 30sec.')
+        time.sleep(30)
 
 # Internal
 
@@ -67,16 +75,9 @@ def _make_request(url, from_, to, filter=None):
     else:
         result_str = '{0}&updatesFilter={1}'.format(result_str, six.u(str(filter)))
     response = s.get(result_str, auth=(hra_user, hra_pass))
-    return (response, result_str)
+    return response
 
 
-def _get_to_date(conn):
-    to_date = conn['warehouse'].query('select min(api_date_from) from hra').result_proxy.first()[0] - timedelta(days=1)
+def _get_from_date(conn):
+    to_date = conn['warehouse'].query('select max(updated_date) from hra').result_proxy.first()[0] + timedelta(days=1)
     return to_date
-
-
-def _write_base(record, app_id, conn):
-    check_id = conn['warehouse'].query('select count(*) from hra where application_id=:app_id', app_id=app_id)
-    for row in check_id:
-        if row['count'] == 0:
-            base.writers.write_record(conn, record)
