@@ -29,6 +29,9 @@ def collect(conf, conn):
     errors = 0
     success = 0
     beginning_date = date(2008, 12, 1)
+    last_updated_iter = conn['warehouse'].query('select max(meta_updated) from hra')
+    for row in last_updated_iter:
+        last_updated = row['max'].date()
     try:
         table = conn['warehouse'].load_table('hra')
         if table.count() == 0:
@@ -48,7 +51,7 @@ def collect(conf, conn):
         if (len(response.json()) > 0):
             for application in response.json():
                 try:
-                    record = parse_response(application, response)
+                    record = parse_response(application, response, last_updated)
                     base.writers.write_record(conn, record)
                     success += 1
                     if not success % 100:
@@ -81,5 +84,5 @@ def _make_request(url, from_, to, filter=None):
 
 
 def _get_from_date(conn):
-    to_date = conn['warehouse'].query('select max(updated_date) from hra').result_proxy.first()[0] + timedelta(days=1)
-    return to_date
+    from_date = conn['warehouse'].query('select max(publication_date) from hra').result_proxy.first()[0] + timedelta(days=1)
+    return from_date
