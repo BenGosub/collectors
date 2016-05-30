@@ -66,9 +66,6 @@ def _collect_records(conn, url):
     errors = 0
     success = 0
     beginning_date = date(2008, 12, 1)
-    last_updated_iter = conn['warehouse'].query('select max(meta_updated) from hra')
-    for row in last_updated_iter:
-        last_updated = row['max'].date()
     try:
         table = conn['warehouse'].load_table('hra')
         if table.count() == 0:
@@ -88,7 +85,7 @@ def _collect_records(conn, url):
         if (len(response.json()) > 0):
             for application in response.json():
                 try:
-                    record = parse_response(application, response, last_updated)
+                    record = parse_response(application, response)
                     base.writers.write_record(conn, record)
                     success += 1
                     if not success % 100:
@@ -100,5 +97,3 @@ def _collect_records(conn, url):
                     logger.warning('Collecting error: %s', repr(exception))
         from_date = to_date + timedelta(days=1)
         to_date = to_date + timedelta(days=query_period)
-        logger.info('Sleeping for 30sec.')
-        tm.sleep(30)

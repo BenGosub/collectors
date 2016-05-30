@@ -10,9 +10,8 @@ import six
 logger = logging.getLogger(__name__)
 
 
-def parse_response(application, response, last_updated):
+def parse_response(application, response):
     data = {}
-    data['last_updated'] = last_updated.strftime('%Y-%m-%d')
     data['application_id'] = six.u(str(application['ApplicationID']))
     data['publication_date'] = application['PublicationDate']
     data['updated_date'] = application['UpdatedDate']
